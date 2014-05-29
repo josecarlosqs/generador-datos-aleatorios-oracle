@@ -76,6 +76,8 @@ $clientes = array();
 $empleados = array();
 $fechaCli = array();
 
+$servicios = array("drive","docs","hojas de calculo","diapositivas","gmail","sites","calendar","google plus");
+
 for($i=0; $i<$cantidad; $i++){
 	do{
 		$f = generarNum();
@@ -246,6 +248,24 @@ for($i=0; $i<count($clientes); $i++){
 	}
 }
 
+$resul .= "\n\n";
+$resul .= "-- Datos de la tabla SERVICIO\n";
+ for($i=0; $i<7;$i++){
+ 	for($j=1;$j<=3;$j++){
+ 		$resul .= "INSERT INTO SERVICIO VALUES (".$i.",".$j.",'".ucwords($servicios[$i])."');\n";
+ 	}
+ }
+
+$resul .= "\n\n";
+$resul .= "-- Datos de la tabla CARACTERISTICA\n";
+
+$catCar = "ABCDE";
+$almac = array("60GB", "100GB", "200GB", "250GB", "500GB", "1TB", "4TB");
+ for($i=0; $i<count($almac);$i++){
+ 	$resul .= "INSERT INTO CARACTERISTICA VALUES (,,,);\n";
+ }
+
+
 
 ?>
 <html>
@@ -261,3 +281,5 @@ for($i=0; $i<count($clientes); $i++){
 	<pre class="brush: sql"><?=$resul;?></pre>
 </body>
 </html>
+
+//4
