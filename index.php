@@ -1,70 +1,20 @@
 <?php
+require("misc.class.php");
+
 $cantidad = 50;
 $cantidadEmpleados = 8;
 $resul="";
 
-function generarCa($car){
-	$l="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890=)({}^*|[]#@ ";
-	$cad="";
-	for($i=0;$i<$car;$i++){
-		$cad .=$l[rand(0,strlen($l)-1)];
-	}
-	return $cad;
 
-}
+$bd = new Badatos();
+$p = new Procesador();
+$g = new Generador();
 
-function numAle($de,$a,$cif){
-	$num = ''.rand($de, $a);
-	$fin='';
-	for($i=0;$i<$cif-strlen($num);$i++){
-		$fin .= '0';
-	}
-	$fin .= $num;
-	return $fin;
-}
+$dR = $bd->query("SELECT num, direccion FROM direcciones ORDER BY RANDOM()"); 
+$aP = $bd->query("SELECT num, apellido FROM apellidos ORDER BY RANDOM()"); 
+$aM = $bd->query("SELECT num, apellido FROM apellidos ORDER BY RANDOM()"); 
+$nM = $bd->query("SELECT num, nombre FROM nombres ORDER BY RANDOM()"); 
 
-function deslatinizar($txt){
-	$txt = str_replace('Á', 'A', $txt);
-	$txt = str_replace('É', 'E', $txt);
-	$txt = str_replace('Í', 'I', $txt);
-	$txt = str_replace('Ó', 'O', $txt);
-	$txt = str_replace('Ú', 'U', $txt);
-	$txt = str_replace('Ñ', 'N', $txt);
-	return $txt;
-}
-
-function genNick($n, $a1, $a2){
-	return strtolower(deslatinizar($n))[0].strtolower(deslatinizar($a1)).strtolower(deslatinizar($a2))[0].rand(10,99);
-}
-
-function generarNum(){
-	$digitos = rand(8,9);
-	$docs = array(8=>"1", 9=>"2");
-	$num = "";
-	for($i=0;$i<$digitos;$i++){
-		switch($i){
-			case 0:
-			$v = rand(0,7);
-			break;
-			case 1:
-			$v = rand(0,2);
-			break;
-			default:
-			$v = rand(0,9);
-			break;
-		}
-		$num .= $v;
-	}
-	return array($num,$docs[$digitos]);
-}
-
-$link = mysql_connect("localhost", "badatos", "badatos"); 
-mysql_select_db("datotos", $link); 
-
-$dR = mysql_query("SELECT num, direccion FROM direcciones ORDER BY RAND()", $link); 
-$aP = mysql_query("SELECT num, apellido FROM apellidos ORDER BY RAND()", $link); 
-$aM = mysql_query("SELECT num, apellido FROM apellidos ORDER BY RAND()", $link); 
-$nM = mysql_query("SELECT num, nombre FROM nombres ORDER BY RAND()", $link); 
 
 $docu = array();
 $direccion = array();
@@ -80,14 +30,14 @@ $servicios = array("drive","docs","hojas de calculo","diapositivas","gmail","sit
 
 for($i=0; $i<$cantidad; $i++){
 	do{
-		$f = generarNum();
+		$f = $g->generarNum();
 	}while(in_array($f, $docu));
 
-	array_push($docu, generarNum());
+	array_push($docu, $g->generarNum());
 }
 
 $k=0;
-while ($row = mysql_fetch_row($dR)){ 
+while ($row = $dR->fetchArray()){ 
 	array_push($direccion, $row[1]);
 	$k++;
 	if($k == $cantidad){
@@ -96,7 +46,7 @@ while ($row = mysql_fetch_row($dR)){
 } 
 
 $k=0;
-while ($row = mysql_fetch_row($aP)){ 
+while ($row = $aP->fetchArray()){ 
 	array_push($apePat, mb_strtoupper($row[1], 'utf-8'));
 	$k++;
 	if($k == $cantidad){
@@ -105,7 +55,7 @@ while ($row = mysql_fetch_row($aP)){
 } 
 
 $k=0;
-while ($row = mysql_fetch_row($aM)){
+while ($row = $aM->fetchArray()){
 	array_push($apeMat, mb_strtoupper($row[1], 'utf-8'));
 	$k++;
 	if($k == $cantidad){
@@ -113,9 +63,8 @@ while ($row = mysql_fetch_row($aM)){
 	}
 } 
 
-
 $k=0;
-while ($row = mysql_fetch_row($nM)){
+while ($row = $nM->fetchArray()){
 	array_push($nom, mb_strtoupper($row[1], 'utf-8'));
 	$k++;
 	if($k == $cantidad){
@@ -164,7 +113,7 @@ $resul .= "\n\n";
 $resul .= "-- Datos de la tabla CONTACTO\n";
 $doms = array("hotmail.com", "outlook.com", "gmail.com", "usmp.pe", "yahoo.com");
 for ($i=0; $i < $cantidad; $i++) { 
-	$resul .= "INSERT INTO CONTACTO VALUES(".$docu[$i][0].",1,'".genNick($nom[$i],$apePat[$i],$apeMat[$i])."@".$doms[rand(0,4)]."');\n";
+	$resul .= "INSERT INTO CONTACTO VALUES(".$docu[$i][0].",1,'".$p->genNick($nom[$i],$apePat[$i],$apeMat[$i])."@".$doms[rand(0,4)]."');\n";
 
 	if(round(rand(0,999))%2 == 0)
 		$resul .= "INSERT INTO CONTACTO VALUES(".$docu[$i][0].",2,'".rand(3000000,7000000)."');\n";
@@ -204,7 +153,7 @@ $resul .= "-- Datos de la tabla CLIENTE\n";
 
 for($i=0; $i<$cantidad;$i++){
 	if(!in_array($docu[$i], $empleados)){
-		$fecha = ''.rand(1999,2014).'-0'.rand(1,5).'-'.numAle(1,30,2);
+		$fecha = ''.rand(1999,2014).'-0'.rand(1,5).'-'.$g->numAle(1,30,2);
 		$ben = 'null';
 		if(rand(0,7)%7==0){
 			$ben=''.rand(1,3);
@@ -222,7 +171,7 @@ $resul .= "-- Datos de la tabla CREDENCIAL\n";
 for($i=0; $i<count($clientes); $i++){
 	$nuevafecha = strtotime ( '+'.rand(1,5).' days' , strtotime ( $fechaCli[$i] ) ) ;
 	$nuevafecha = date ( 'd/m/Y' , $nuevafecha );
-	$resul .= "INSERT INTO CREDENCIAL VALUES(".$clientes[$i][0].",'".generarCa(15)."', TO_DATE('".$nuevafecha."','DD/MM/YYYY'));\n";
+	$resul .= "INSERT INTO CREDENCIAL VALUES(".$clientes[$i][0].",'".$g->generarCa(15)."', TO_DATE('".$nuevafecha."','DD/MM/YYYY'));\n";
 }
 
 $resul .= "\n\n";
@@ -256,17 +205,6 @@ $resul .= "-- Datos de la tabla SERVICIO\n";
  	}
  }
 
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla CARACTERISTICA\n";
-
-$catCar = "ABCDE";
-$almac = array("60GB", "100GB", "200GB", "250GB", "500GB", "1TB", "4TB");
- for($i=0; $i<count($almac);$i++){
- 	$resul .= "INSERT INTO CARACTERISTICA VALUES (,,,);\n";
- }
-
-
-
 ?>
 <html>
 <head>
@@ -281,5 +219,3 @@ $almac = array("60GB", "100GB", "200GB", "250GB", "500GB", "1TB", "4TB");
 	<pre class="brush: sql"><?=$resul;?></pre>
 </body>
 </html>
-
-//4
