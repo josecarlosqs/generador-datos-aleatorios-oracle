@@ -1,4 +1,7 @@
 <?php
+//
+// Clase en PHP que genera los registros
+// aleatorios para la base de datos.
 require("misc.class.php");
 
 $cantidad = 50;
@@ -25,6 +28,7 @@ $nom = array();
 $clientes = array();
 $empleados = array();
 $fechaCli = array();
+$beneCli = array();
 
 $servicios = array("drive","docs","hojas de calculo","diapositivas","gmail","sites","calendar","google plus");
 
@@ -96,6 +100,13 @@ INSERT INTO CARGO VALUES(3,'VENDEDOR',800);
 INSERT INTO BENEFICIO VALUES(1,'Beneficio correspondiente a clientes con mas de 1 año de pagos al dia.');
 INSERT INTO BENEFICIO VALUES(2,'Beneficio correspondiente a clientes con mas de 5 años de pagos al dia.');
 INSERT INTO BENEFICIO VALUES(3,'Beneficio correspondiente a clientes con mas de 10 años.');
+
+-- Datos de la tabla PAQUETE
+INSERT INTO PAQUETE VALUES (1,null,'Ideal para pequeñas empresas o para uso personal.','100GB',2.69);
+INSERT INTO PAQUETE VALUES (2,null,'Mas capacidad para usuarios mas exigentes.','1TB',12.29);
+INSERT INTO PAQUETE VALUES (3,1,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB',10.99);
+INSERT INTO PAQUETE VALUES (4,2,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB',9.99);
+INSERT INTO PAQUETE VALUES (5,3,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB',9.00);
 ";
 
 $resul .= "-- Datos de la tabla DOCUMENTO\n";
@@ -153,7 +164,7 @@ $resul .= "-- Datos de la tabla CLIENTE\n";
 
 for($i=0; $i<$cantidad;$i++){
 	if(!in_array($docu[$i], $empleados)){
-		$fecha = ''.rand(1999,2014).'-0'.rand(1,5).'-'.$g->numAle(1,30,2);
+		$fecha = ''.rand(1999,2014).'-0'.rand(1,5).'-'.$g->numAle(1,28,2);
 		$ben = 'null';
 		if(rand(0,7)%7==0){
 			$ben=''.rand(1,3);
@@ -161,6 +172,7 @@ for($i=0; $i<$cantidad;$i++){
 		$resul .= "INSERT INTO CLIENTE VALUES(".$docu[$i][0].",".$ben.",TO_DATE('".$fecha."', 'YYYY-MM-DD'));\n";
 		array_push($clientes, $docu[$i]);
 		array_push($fechaCli, $fecha);
+		array_push($beneCli, $ben);
 	}
 }
 
@@ -200,11 +212,22 @@ for($i=0; $i<count($clientes); $i++){
 $resul .= "\n\n";
 $resul .= "-- Datos de la tabla SERVICIO\n";
  for($i=0; $i<7;$i++){
- 	for($j=1;$j<=3;$j++){
- 		$resul .= "INSERT INTO SERVICIO VALUES (".$i.",".$j.",'".ucwords($servicios[$i])."');\n";
+ 	$resul .= "INSERT INTO SERVICIO VALUES (".($i+1).",'".ucwords($servicios[$i])."');\n";
+ }
+
+$resul .= "\n\n";
+$resul .= "-- Datos de la tabla SERVICIOXPAQUETE\n";
+ for($i=1; $i<=7;$i++){
+ 	for($j=1;$j<=5;$j++){
+ 		$resul .= "INSERT INTO SERVICIOXPAQUETE VALUES (".$i.",".$j.");\n";
  	}
  }
 
+$resul .= "\n\n";
+$resul .= "-- Datos de la tabla VENTAPAQUETE\n";
+ for($i=0; $i<count($clientes);$i++){
+ 	$resul .= "INSERT INTO VENTAPAQUETE VALUES (".($i+1).",".rand(1,5).");\n";
+ }
 ?>
 <html>
 <head>
