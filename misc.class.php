@@ -31,9 +31,7 @@ class Generador{
 		return $fin;
 	}
 
-	public function generarNum(){
-		$digitos = rand(8,9);
-		$docs = array(8=>"1", 9=>"2");
+	public function generarDoc($digitos){
 		$num = "";
 		for($i=0;$i<$digitos;$i++){
 			switch($i){
@@ -49,7 +47,7 @@ class Generador{
 			}
 			$num .= $v;
 		}
-		return array($num,$docs[$digitos]);
+		return $num;
 	}
 
 }
@@ -69,6 +67,24 @@ class Procesador{
 
 	public function genNick($n, $a1, $a2){
 		return strtolower($this->deslatinizar($n))[0].strtolower($this->deslatinizar($a1)).strtolower($this->deslatinizar($a2))[0].rand(10,99);
+	}
+
+	public function comprobarExistencia($cual, $de){
+		$f=0;
+		if(count($de)>1){
+			for($i=0;$i<count($de);$i++){
+				if($de[$i] == $cual){
+					$f=1;
+					break;
+				}
+			}
+		}
+		return $f;
+	}
+
+	public function modificarFecha($fecha, $dias){
+		$nuevafecha = strtotime ($dias.' days',strtotime($fecha));
+		return date ('Y-m-d',$nuevafecha);
 	}
 }
 

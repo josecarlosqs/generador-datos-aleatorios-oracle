@@ -6,228 +6,113 @@ require("misc.class.php");
 
 $cantidad = 50;
 $cantidadEmpleados = 8;
-$resul="";
+$cargoEmpleados = array(1,2,2,3,3,3,3,3);
+if(count($cargoEmpleados) != $cantidadEmpleados){
+	echo "Empleados no coinciden";
+	exit;
+}
 
-
+// consts
+$doms = array("hotmail.com", "outlook.com", "gmail.com", "usmp.pe", "yahoo.com");
+$nCo = 0;
 $bd = new Badatos();
 $p = new Procesador();
 $g = new Generador();
 
-$dR = $bd->query("SELECT num, direccion FROM direcciones ORDER BY RANDOM()"); 
-$aP = $bd->query("SELECT num, apellido FROM apellidos ORDER BY RANDOM()"); 
-$aM = $bd->query("SELECT num, apellido FROM apellidos ORDER BY RANDOM()"); 
-$nM = $bd->query("SELECT num, nombre FROM nombres ORDER BY RANDOM()"); 
+$sqDir = $bd->query("SELECT direccion FROM direcciones ORDER BY RANDOM()"); 
+$sqApat = $bd->query("SELECT apellido FROM apellidos ORDER BY RANDOM()"); 
+$sqAmat = $bd->query("SELECT apellido FROM apellidos ORDER BY RANDOM()"); 
+$sqNom = $bd->query("SELECT nombre FROM nombres ORDER BY RANDOM()"); 
 
-
-$docu = array();
-$direccion = array();
-$apePat = array();
-$apeMat = array();
-$nom = array();
-
+// arrays
+$personas = array();
 $clientes = array();
 $empleados = array();
-$fechaCli = array();
-$beneCli = array();
+$docs = array();
 
-$servicios = array("drive","docs","hojas de calculo","diapositivas","gmail","sites","calendar","google plus");
+$dR = array();
+$aP = array();
+$aM = array();
+$nM = array();
 
+// llenar arrays principales
+while ($row = $sqDir->fetchArray()){ 
+	array_push($dR, mb_strtoupper(sprintf($row[0], ''.rand(100,999)),'utf-8'));
+} 
+while ($row = $sqApat->fetchArray()){ 
+	array_push($aP, mb_strtoupper($row[0], 'utf-8'));
+} 
+while ($row = $sqAmat->fetchArray()){ 
+	array_push($aM, mb_strtoupper($row[0], 'utf-8'));
+} 
+while ($row = $sqNom->fetchArray()){ 
+	array_push($nM, mb_strtoupper($row[0], 'utf-8'));
+} 
+
+// llenar arrays
 for($i=0; $i<$cantidad; $i++){
-	do{
-		$f = $g->generarNum();
-	}while(in_array($f, $docu));
-
-	array_push($docu, $g->generarNum());
+	$qcdoc = rand(8,9);
+	$doc = $g->generarDoc($qcdoc);
+	array_push($docs, $doc);
+	array_push($personas, array($doc,'ACTIVO',$nM[$i],$aP[$i],$aM[$i],$dR[$i],''.rand(1,2),''.rand(1,3)));
 }
 
-$k=0;
-while ($row = $dR->fetchArray()){ 
-	array_push($direccion, $row[1]);
-	$k++;
-	if($k == $cantidad){
-		break;
-	}
-} 
 
-$k=0;
-while ($row = $aP->fetchArray()){ 
-	array_push($apePat, mb_strtoupper($row[1], 'utf-8'));
-	$k++;
-	if($k == $cantidad){
-		break;
-	}
-} 
-
-$k=0;
-while ($row = $aM->fetchArray()){
-	array_push($apeMat, mb_strtoupper($row[1], 'utf-8'));
-	$k++;
-	if($k == $cantidad){
-		break;
-	}
-} 
-
-$k=0;
-while ($row = $nM->fetchArray()){
-	array_push($nom, mb_strtoupper($row[1], 'utf-8'));
-	$k++;
-	if($k == $cantidad){
-		break;
-	}
-}
-
-$resul .= "-- Datos de la tabla TIPO_DOCUMENTO
-INSERT INTO TIPO_DOCUMENTO VALUES(1,'DNI');
-INSERT INTO TIPO_DOCUMENTO VALUES(2,'CARNET EXTRANJERIA');
-INSERT INTO TIPO_DOCUMENTO VALUES(3,'RUC');
-
--- Datos de la tabla TIPO_CONTACTO
-INSERT INTO TIPO_CONTACTO VALUES(1,'CORREO');
-INSERT INTO TIPO_CONTACTO VALUES(2,'CASA');
-INSERT INTO TIPO_CONTACTO VALUES(3,'CELULAR');
-INSERT INTO TIPO_CONTACTO VALUES(4,'OFICINA');
-
--- Datos de la tabla TIPO_PERSONA
-INSERT INTO TIPO_PERSONA VALUES(1,'NATURAL');
-INSERT INTO TIPO_PERSONA VALUES(2,'JURIDICA');
-
--- Datos de la tabla CARGO
-INSERT INTO CARGO VALUES(1,'ADMINISTRADOR',4000);
-INSERT INTO CARGO VALUES(2,'SUPERVISOR',2000);
-INSERT INTO CARGO VALUES(3,'VENDEDOR',800);
-
--- Datos de la tabla BENEFICIO
-INSERT INTO BENEFICIO VALUES(1,'Beneficio correspondiente a clientes con mas de 1 año de pagos al dia.');
-INSERT INTO BENEFICIO VALUES(2,'Beneficio correspondiente a clientes con mas de 5 años de pagos al dia.');
-INSERT INTO BENEFICIO VALUES(3,'Beneficio correspondiente a clientes con mas de 10 años.');
-
--- Datos de la tabla PAQUETE
-INSERT INTO PAQUETE VALUES (1,null,'Ideal para pequeñas empresas o para uso personal.','100GB',2.69);
-INSERT INTO PAQUETE VALUES (2,null,'Mas capacidad para usuarios mas exigentes.','1TB',12.29);
-INSERT INTO PAQUETE VALUES (3,1,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB',10.99);
-INSERT INTO PAQUETE VALUES (4,2,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB',9.99);
-INSERT INTO PAQUETE VALUES (5,3,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB',9.00);
-";
-
-$resul .= "-- Datos de la tabla DOCUMENTO\n";
+$txtPer = "-- Datos de la tabla PERSONA\n";
 for($i=0; $i<$cantidad;$i++){
-	$resul .= "INSERT INTO DOCUMENTO VALUES(".$docu[$i][0].",".$docu[$i][1].");\n";
+	$txtPer .= "INSERT INTO PERSONA VALUES('".$personas[$i][0]."','".$personas[$i][1]."','".$personas[$i][2]."','".$personas[$i][3]."','".$personas[$i][4]."','".$personas[$i][5]."','".$personas[$i][6]."','".$personas[$i][7]."');\n";
 }
 
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla PERSONA\n";
-for($i=0; $i<$cantidad;$i++){
-	$resul .= "INSERT INTO PERSONA VALUES(".$docu[$i][0].",'".$nom[$i]."','".$apePat[$i]."','".$apeMat[$i]."','".mb_strtoupper(sprintf($direccion[$i], ''.rand(100,999)),'utf-8')."',1);\n";
-}
-
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla CONTACTO\n";
-$doms = array("hotmail.com", "outlook.com", "gmail.com", "usmp.pe", "yahoo.com");
+$txtContac = "-- Datos de la tabla CONTACTO\n";
 for ($i=0; $i < $cantidad; $i++) { 
-	$resul .= "INSERT INTO CONTACTO VALUES(".$docu[$i][0].",1,'".$p->genNick($nom[$i],$apePat[$i],$apeMat[$i])."@".$doms[rand(0,4)]."');\n";
+	$txtContac .= "INSERT INTO CONTACTO VALUES(".++$nCo.",'".$p->genNick($personas[$i][3],$personas[$i][4],$personas[$i][5])."@".$doms[rand(0,4)]."',1,'".$personas[$i][0]."');\n";
 
 	if(round(rand(0,999))%2 == 0)
-		$resul .= "INSERT INTO CONTACTO VALUES(".$docu[$i][0].",2,'".rand(3000000,7000000)."');\n";
+		$txtContac .="INSERT INTO CONTACTO VALUES(".++$nCo.",'".rand(3000000,7000000)."',2,'".$personas[$i][0]."');\n";
 	if(round(rand(0,999))%3 == 0)
-		$resul .= "INSERT INTO CONTACTO VALUES(".$docu[$i][0].",3,'".rand(900000000,999999999)."');\n";
+		$txtContac .="INSERT INTO CONTACTO VALUES(".++$nCo.",'".rand(900000000,999999999)."',3,'".$personas[$i][0]."');\n";
 	if(round(rand(0,999))%5 == 0)
-		$resul .= "INSERT INTO CONTACTO VALUES(".$docu[$i][0].",4,'".rand(3000000,7000000)."');\n";
+		$txtContac .="INSERT INTO CONTACTO VALUES(".++$nCo.",'".rand(3000000,7000000)."',4,'".$personas[$i][0]."');\n";
 }
 
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla EMPLEADO\n";
-
-for ($i=0; $i < $cantidadEmpleados; $i++) { 
-	$n = rand(0,$cantidad-1-$i);
-	switch($i){
-		case 0:
-			$resul .= "INSERT INTO EMPLEADO VALUES(".$docu[$n][0].",1);\n";
-		break;
-
-		case 1:
-			$resul .= "INSERT INTO EMPLEADO VALUES(".$docu[$n][0].",2);\n";
-		break;
-		
-		case 2:
-			$resul .= "INSERT INTO EMPLEADO VALUES(".$docu[$n][0].",2);\n";
-		break;
-
-		default:
-			$resul .= "INSERT INTO EMPLEADO VALUES(".$docu[$n][0].",3);\n";
-		break;
+$txtClie = "-- Datos de la tabla CLIENTE\n";
+$txtEmpl = "-- Datos de la tabla EMPLEADO\n";
+$clavesEmpl = array_rand($personas,$cantidadEmpleados);
+for ($i=0; $i < $cantidad; $i++) {
+	$fecha = ''.rand(1999,2014).'-0'.rand(1,5).'-'.$g->numAle(1,28,2);
+	if(in_array($i, $clavesEmpl)){
+		$emple = --$cantidadEmpleados;
+		array_push($empleados, array($docs[$clavesEmpl[$emple]],$cargoEmpleados[$emple],$fecha));
+		$txtEmpl .= "INSERT INTO EMPLEADO VALUES('".$docs[$clavesEmpl[$emple]]."',".$cargoEmpleados[$emple].",TO_DATE('".$fecha."','YYYY-MM-DD'),null);\n";
+	}else{
+		array_push($clientes, array($docs[$i],$fecha));
+		$txtClie .= "INSERT INTO CLIENTE VALUES('".$docs[$i]."',TO_DATE('".$fecha."','YYYY-MM-DD'),null);\n";
 	}
-	array_push($empleados, $docu[$n]);
 }
 
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla CLIENTE\n";
+$txtCrede = "-- Datos de la tabla CREDENCIAL\n";
+for($i=0; $i<count($clientes);$i++){
+	$txtCrede .= "INSERT INTO CREDENCIAL VALUES('".$clientes[$i][0]."','".$g->generarCa(10)."',TO_DATE('".$p->modificarFecha(date('Y-m-d'),'-'.rand(1,3))."','YYYY-MM-DD'));\n";
+}
 
-for($i=0; $i<$cantidad;$i++){
-	if(!in_array($docu[$i], $empleados)){
-		$fecha = ''.rand(1999,2014).'-0'.rand(1,5).'-'.$g->numAle(1,28,2);
-		$ben = 'null';
-		if(rand(0,7)%7==0){
-			$ben=''.rand(1,3);
-		}
-		$resul .= "INSERT INTO CLIENTE VALUES(".$docu[$i][0].",".$ben.",TO_DATE('".$fecha."', 'YYYY-MM-DD'));\n";
-		array_push($clientes, $docu[$i]);
-		array_push($fechaCli, $fecha);
-		array_push($beneCli, $ben);
+$txtVenta = "-- Datos de la tabla VENTA\n";
+for($i=0; $i<count($clientes);$i++){
+	$txtVenta .= "INSERT INTO VENTA VALUES(".($i+1).",TO_DATE('".$clientes[$i][1]."','YYYY-MM-DD'),'VENTA','".$empleados[rand(0,4)][0]."','".$clientes[$i][0]."');\n";
+}
+
+$txtVentaPaque = "-- Datos de la tabla VENTAPAQUETE\n";
+for($i=0; $i<count($clientes);$i++){
+	$txtVentaPaque .= "INSERT INTO VENTAPAQUETE VALUES (".rand(1,2).",".($i+1).");\n";
+}
+
+$txtSXP = "-- Datos de la tabla SXP\n";
+for($i=1; $i<=5;$i++){
+	for($j=1; $j<=8;$j++){
+		$txtSXP .= "INSERT INTO SERVICIOXPAQUETE VALUES (".$i.",".$j.");\n";
 	}
 }
 
 
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla CREDENCIAL\n";
-
-for($i=0; $i<count($clientes); $i++){
-	$nuevafecha = strtotime ( '+'.rand(1,5).' days' , strtotime ( $fechaCli[$i] ) ) ;
-	$nuevafecha = date ( 'd/m/Y' , $nuevafecha );
-	$resul .= "INSERT INTO CREDENCIAL VALUES(".$clientes[$i][0].",'".$g->generarCa(15)."', TO_DATE('".$nuevafecha."','DD/MM/YYYY'));\n";
-}
-
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla VENTA\n";
-
-for($i=0; $i<count($clientes); $i++){
-	$estados = "PV";
-	$resul .= "INSERT INTO VENTA VALUES(".($i+1).", ".$clientes[$i][0].",TO_DATE('".$fechaCli[$i]."', 'YYYY-MM-DD'), '".$estados[rand(0,1)]."');\n";
-}
-
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla PEDIDO_BACKUP\n";
-
-$numpedi = 1;
-$estPed="PE";
-$tiPed="TP";
-for($i=0; $i<count($clientes); $i++){
-	if(rand(0,200) % 7 == 0){
-		$nuevafecha = strtotime ( '+'.rand(1,7).' days' , strtotime ("2014-05-26") ) ;
-		$nuevafecha = date ( 'Y-m-d' , $nuevafecha );
-		$resul .= "INSERT INTO PEDIDO_BACKUP VALUES(".$numpedi.", ".$i.",TO_DATE('2014-05-26', 'YYYY-MM-DD'),TO_DATE('".$nuevafecha."', 'YYYY-MM-DD'), '".rand(200,2000)."', '".$estPed[rand(0,1)]."', '".$tiPed[rand(0,1)]."');\n";
-		$numpedi++;
-	}
-}
-
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla SERVICIO\n";
- for($i=0; $i<7;$i++){
- 	$resul .= "INSERT INTO SERVICIO VALUES (".($i+1).",'".ucwords($servicios[$i])."');\n";
- }
-
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla SERVICIOXPAQUETE\n";
- for($i=1; $i<=7;$i++){
- 	for($j=1;$j<=5;$j++){
- 		$resul .= "INSERT INTO SERVICIOXPAQUETE VALUES (".$i.",".$j.");\n";
- 	}
- }
-
-$resul .= "\n\n";
-$resul .= "-- Datos de la tabla VENTAPAQUETE\n";
- for($i=0; $i<count($clientes);$i++){
- 	$resul .= "INSERT INTO VENTAPAQUETE VALUES (".($i+1).",".rand(1,5).");\n";
- }
 ?>
 <html>
 <head>
@@ -239,6 +124,64 @@ $resul .= "-- Datos de la tabla VENTAPAQUETE\n";
 	<script type="text/javascript">SyntaxHighlighter.all();</script>
 </head>
 <body style="background: white; font-family: Helvetica">
-	<pre class="brush: sql"><?=$resul;?></pre>
+<pre class="brush: sql">
+-- Datos de la tabla TIPO_DOCUMENTO
+INSERT INTO TIPO_DOCUMENTO VALUES(1,'DNI');
+INSERT INTO TIPO_DOCUMENTO VALUES(2,'CARNET EXTRANJERIA');
+INSERT INTO TIPO_DOCUMENTO VALUES(3,'RUC');
+
+-- Datos de la tabla TIPO_PERSONA
+INSERT INTO TIPO_PERSONA VALUES(1,'NATURAL');
+INSERT INTO TIPO_PERSONA VALUES(2,'JURIDICA');
+
+<?=$txtPer;?>
+
+-- Datos de la tabla TIPO_CONTACTO
+INSERT INTO TIPO_CONTACTO VALUES(1,'CORREO');
+INSERT INTO TIPO_CONTACTO VALUES(2,'CASA');
+INSERT INTO TIPO_CONTACTO VALUES(3,'CELULAR');
+INSERT INTO TIPO_CONTACTO VALUES(4,'OFICINA');
+
+<?=$txtContac;?>
+
+-- Datos de la tabla CARGO
+INSERT INTO CARGO VALUES(1,'ADMINISTRADOR',4000.00);
+INSERT INTO CARGO VALUES(2,'SUPERVISOR',2000.00);
+INSERT INTO CARGO VALUES(3,'VENDEDOR',800.00);
+
+-- Datos de la tabla BENEFICIO
+INSERT INTO BENEFICIO VALUES(1,'Beneficio correspondiente a clientes con mas de 1 año de pagos al dia.');
+INSERT INTO BENEFICIO VALUES(2,'Beneficio correspondiente a clientes con mas de 5 años de pagos al dia.');
+INSERT INTO BENEFICIO VALUES(3,'Beneficio correspondiente a clientes con mas de 10 años.');
+
+<?=$txtClie;?>
+
+<?=$txtEmpl;?>
+
+<?=$txtCrede;?>
+
+<?=$txtVenta;?>
+
+-- Datos de la tabla PAQUETE
+INSERT INTO PAQUETE VALUES (1,'Ideal para pequeñas empresas o para uso personal.','100GB','2.69');
+INSERT INTO PAQUETE VALUES (2,'Mas capacidad para usuarios mas exigentes.','1TB','12.29');
+INSERT INTO PAQUETE VALUES (3,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB','10.99');
+INSERT INTO PAQUETE VALUES (4,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB','9.99');
+INSERT INTO PAQUETE VALUES (5,'PROMO: Mas capacidad para usuarios mas exigentes.','1TB','9.00');
+
+<?=$txtVentaPaque;?>
+
+-- Datos de la tabla SERVICIO
+INSERT INTO SERVICIO VALUES (1,'DRIVE');
+INSERT INTO SERVICIO VALUES (2,'DOCS');
+INSERT INTO SERVICIO VALUES (3,'HOJAS DE CALCULO');
+INSERT INTO SERVICIO VALUES (4,'DIAPOSITIVAS');
+INSERT INTO SERVICIO VALUES (5,'GMAIL');
+INSERT INTO SERVICIO VALUES (6,'SITES');
+INSERT INTO SERVICIO VALUES (7,'CALENDAR');
+INSERT INTO SERVICIO VALUES (8,'GOOGLE PLUS');
+
+<?=$txtSXP;?>
+</pre>
 </body>
 </html>
